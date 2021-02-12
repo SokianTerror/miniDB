@@ -364,16 +364,16 @@ class Table:
             if exist != True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append('null')
+                    none_values.append(-52)
                 join_table._insert(row_left + none_values)
 
         print(f'## Select ops no. -> {no_of_ops}')
         print(f'# Left table size -> {len(self.data)}')
         print(f'# Right table size -> {len(table_right.data)}')
 
-        return left_outer_join_table
+        return join_table
 
-    def _right_outer_inner_join(self, table_right: Table, condition):
+    def _right_outer_join(self, table_right: Table, condition):
         '''
         Left outer join table (left) with a supplied table (right) where condition is met.
         '''
@@ -393,7 +393,7 @@ class Table:
 
         # define the new tables name, its column names and types
         join_table_name = f'{self._name}_join_{table_right._name}'
-        join_table_colnames = left_names+right_names
+        join_table_colnames = left_names + right_names
         join_table_coltypes = self.column_types+table_right.column_types
         join_table = Table(name=join_table_name, column_names=join_table_colnames, column_types= join_table_coltypes)
 
@@ -401,26 +401,26 @@ class Table:
         no_of_ops = 0
         # this code is dumb on purpose... it needs to illustrate the underline technique
         # for each value in left column and right column, if condition, append the corresponding row to the new table
-        for row_left in self.data:
+        for row_left in table_right.data:
             left_value = row_left[column_index_left]
             exist=False
-            for row_right in table_right.data:
+            for row_right in self.data:
                 right_value = row_right[column_index_right]
                 no_of_ops+=1
                 if get_op(operator, left_value, right_value):
                     exist=True                          #EQ_OP
-                    join_table._insert(row_left+row_right)
+                    join_table._insert(row_right+row_left)
             if exist!=True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append('null')
-                join_table._insert(row_left+none_values)
+                    none_values.append(-52)
+                join_table._insert(none_values+row_left)
 
         print(f'## Select ops no. -> {no_of_ops}')
         print(f'# Left table size -> {len(self.data)}')
         print(f'# Right table size -> {len(table_right.data)}')
 
-        return right_outer_join_table
+        return join_table
 
 
     def show(self, no_of_rows=None, is_locked=False):
@@ -441,6 +441,10 @@ class Table:
         # detect the rows that are no tfull of nones (these rows have been deleted)
         # if we dont skip these rows, the returning table has empty rows at the deleted positions
         non_none_rows = [row for row in self.data if any(row)]
+        #non_none_rows = ['noll' for x in non_none_rows if any(x)==-52]
+        for i in range(len(non_none_rows)):
+           if non_none_rows[i] == -52:
+               non_none_rows[i]='null'
         # print using tabulate
         print(tabulate(non_none_rows[:no_of_rows], headers=headers)+'\n')
 
