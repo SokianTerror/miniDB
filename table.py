@@ -281,6 +281,72 @@ class Table:
         self.data = [self.data[i] for i in idx]
         self._update()
 
+    def _sort_merge_join(self, table_right: Table, condition):
+        column_name_left, operator, column_name_right = self._parse_condition(condition, join=True)
+        #self.data._sort(column_name_left ,True)
+        column = self.columns[self.column_names.index(column_name_left)]
+        idx = sorted(range(len(column)), key=lambda k: column[k])
+        # print(idx)
+        self.data = [self.data[i] for i in idx]
+        self._update()
+        self.data
+        #table_right.data._(column_name_right, True)
+        column = table_right.columns[table_right.column_names.index(column_name_right)]
+        idx = sorted(range(len(column)), key=lambda k: column[k])
+        # print(idx)
+        table_right.data = [table_right.data[i] for i in idx]
+        table_right._update()
+
+
+        try:
+            column_index_left = self.column_names.index(column_name_left)
+            column_index_right = table_right.column_names.index(column_name_right)
+        except:
+            raise Exception(f'Columns dont exist in one or both tables.')
+
+        left_names = [f'{self._name}_{colname}' for colname in self.column_names]
+        right_names = [f'{table_right._name}_{colname}' for colname in table_right.column_names]
+
+        join_table_name = f'{self._name}_join_{table_right._name}'
+        join_table_colnames = left_names + right_names
+        join_table_coltypes = self.column_types + table_right.column_types
+        join_table = Table(name=join_table_name, column_names=join_table_colnames, column_types=join_table_coltypes)
+
+        # count the number of operations (<,> etc)
+        no_of_ops = 0
+        i=0
+        j=0
+        while(True):
+            no_of_ops+=1
+            left_value = self.data[i][column_index_left]
+            right_value = table_right.data[j][column_index_right]
+            if left_value==right_value:
+                join_table._insert(self.data[i]+ table_right.data[j])
+                if i == len(self.columns)-1 and j == len(table_right.columns) -1:
+                    break
+                j+=1
+            elif left_value > right_value:
+                if i == len(self.columns)-1 and j == len(table_right.columns) -1:
+
+                    break
+                j+=1
+            elif left_value < right_value:
+                i+=1
+                if i<=len(self.data)-1:
+                    while j>=1:
+                        if self.data[i][column_index_left] <= table_right.data[j-1][column_index_right]:
+                            j-=1
+                        else:
+                            break
+                else:
+                    break
+
+        print(f'## Select ops no. -> {no_of_ops}')
+        print(f'# Left table size -> {len(self.data)}')
+        print(f'# Right table size -> {len(table_right.data)}')
+
+        return join_table
+
     def _inner_join(self, table_right: Table, condition):
         '''
         Join table (left) with a supplied table (right) where condition is met.
@@ -364,7 +430,7 @@ class Table:
             if exist != True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append(-52)
+                    none_values.append(-999)
                 join_table._insert(row_left + none_values)
 
         print(f'## Select ops no. -> {no_of_ops}')
