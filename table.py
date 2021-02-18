@@ -95,12 +95,14 @@ class Table:
             raise ValueError(f'ERROR -> Cannot insert {len(row)} values. Only {self._no_of_columns} columns exist')
 
         for i in range(len(row)):
-            # for each value, cast and replace it in row.
-            try:
-                row[i] = self.column_types[i](row[i])
 
-            except:
-                raise ValueError(f'ERROR -> Value {row[i]} is not of type {self.column_types[i]}.')
+            # for each value, cast and replace it in row.
+            if row[i] != None:
+                try:
+                    row[i] = self.column_types[i](row[i])
+
+                except:
+                    raise ValueError(f'ERROR -> Value {row[i]} is not of type {self.column_types[i]}.')
 
             # if value is to be appended to the primary_key column, check that it doesnt alrady exist (no duplicate primary keys)
             if i==self.pk_idx and row[i] in self.columns[self.pk_idx]:
@@ -430,7 +432,7 @@ class Table:
             if exist != True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append(-999)
+                    none_values.append(None)
                 join_table._insert(row_left + none_values)
 
         print(f'## Select ops no. -> {no_of_ops}')
@@ -479,7 +481,7 @@ class Table:
             if exist!=True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append(-999)
+                    none_values.append(None)
                 join_table._insert(none_values+row_left)
 
         print(f'## Select ops no. -> {no_of_ops}')
@@ -528,7 +530,7 @@ class Table:
             if exist != True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append(-999)
+                    none_values.append(None)
                 join_table._insert(row_left + none_values)
         for row_left2 in table_right.data:
             left_value2 = row_left2[column_index_left]
@@ -542,7 +544,7 @@ class Table:
             if exist!=True:
                 none_values = []
                 for i in range(len(self.columns)):
-                    none_values.append(-999)
+                    none_values.append(None)
 
                 join_table._insert(none_values+row_left2)
 
@@ -574,7 +576,7 @@ class Table:
         #non_none_rows = ['noll' for x in non_none_rows if any(x)==-52]
         for i,j in enumerate(non_none_rows):
             for n in range(len(self.columns)):
-                if j[n] == -999  or j[n]== '-999':
+                if j[n] == None:
                     non_none_rows[i][n] = 'null'
         # print using tabulate
         print(tabulate(non_none_rows[:no_of_rows], headers=headers)+'\n')
