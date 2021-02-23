@@ -96,7 +96,7 @@ class Table:
 
         for i in range(len(row)):
 
-            # for each value, cast and replace it in row.
+            # for each value, cast and replace it in row except None values.
             if row[i] != None:
                 try:
                     row[i] = self.column_types[i](row[i])
@@ -284,18 +284,16 @@ class Table:
         self._update()
 
     def _sort_merge_join(self, table_right: Table, condition):
+
+        #sort both of my lists
         column_name_left, operator, column_name_right = self._parse_condition(condition, join=True)
-        #self.data._sort(column_name_left ,True)
         column = self.columns[self.column_names.index(column_name_left)]
         idx = sorted(range(len(column)), key=lambda k: column[k])
-        # print(idx)
         self.data = [self.data[i] for i in idx]
         self._update()
         self.data
-        #table_right.data._(column_name_right, True)
         column = table_right.columns[table_right.column_names.index(column_name_right)]
         idx = sorted(range(len(column)), key=lambda k: column[k])
-        # print(idx)
         table_right.data = [table_right.data[i] for i in idx]
         table_right._update()
 
@@ -314,17 +312,15 @@ class Table:
         join_table_coltypes = self.column_types + table_right.column_types
         join_table = Table(name=join_table_name, column_names=join_table_colnames, column_types=join_table_coltypes)
 
-        # count the number of operations (<,> etc)
-        no_of_ops = 0
+        #Initialize i,j(=0) and use them as indexes for my two lists
         i=0
         j=0
         while(True):
-            no_of_ops+=1
             left_value = self.data[i][column_index_left]
             right_value = table_right.data[j][column_index_right]
-            if left_value==right_value:
+            if left_value==right_value: #In case of same value, add row of where value was found to my new table
                 join_table._insert(self.data[i]+ table_right.data[j])
-                if i == len(self.columns)-1 and j == len(table_right.columns) -1:
+                if i == len(self.columns)-1 and j == len(table_right.columns) -1: #In case we are at bot of both lists break
                     break
                 j+=1
             elif left_value > right_value:
@@ -334,8 +330,8 @@ class Table:
                 j+=1
             elif left_value < right_value:
                 i+=1
-                if i<=len(self.data)-1:
-                    while j>=1:
+                if i<=len(self.data)-1: #In case i (= left index) is at the end of left list and right_value is greater than left_value break
+                    while j>=1: #else decrease j to be at the state where left_value can be compared with right value
                         if self.data[i][column_index_left] <= table_right.data[j-1][column_index_right]:
                             j-=1
                         else:
@@ -343,7 +339,6 @@ class Table:
                 else:
                     break
 
-        print(f'## Select ops no. -> {no_of_ops}')
         print(f'# Left table size -> {len(self.data)}')
         print(f'# Right table size -> {len(table_right.data)}')
 
@@ -418,8 +413,8 @@ class Table:
 
         # count the number of operations (<,> etc)
         no_of_ops = 0
-        # this code is dumb on purpose... it needs to illustrate the underline technique
-        # for each value in left column and right column, if condition, append the corresponding row to the new table
+
+        #Nested loops to find same elements
         for row_left in self.data:
             left_value = row_left[column_index_left]
             exist = False
@@ -429,7 +424,7 @@ class Table:
                 if get_op(operator, left_value, right_value):
                     exist = True  # EQ_OP
                     join_table._insert(row_left + row_right)
-            if exist != True:
+            if exist != True: #If a left element has not been found in right table search for table right's columns and add None values to my new table
                 none_values = []
                 for i in range(len(self.columns)):
                     none_values.append(None)
@@ -467,8 +462,7 @@ class Table:
 
         # count the number of operations (<,> etc)
         no_of_ops = 0
-        # this code is dumb on purpose... it needs to illustrate the underline technique
-        # for each value in left column and right column, if condition, append the corresponding row to the new table
+        #Nested loops to find same elements
         for row_left in table_right.data:
             left_value = row_left[column_index_left]
             exist=False
@@ -478,7 +472,7 @@ class Table:
                 if get_op(operator, left_value, right_value):
                     exist=True                          #EQ_OP
                     join_table._insert(row_right+row_left)
-            if exist!=True:
+            if exist!=True: #If a right element has not been found in left table search for left's table columns and add None values to my new table
                 none_values = []
                 for i in range(len(self.columns)):
                     none_values.append(None)
@@ -516,8 +510,7 @@ class Table:
 
         # count the number of operations (<,> etc)
         no_of_ops = 0
-        # this code is dumb on purpose... it needs to illustrate the underline technique
-        # for each value in left column and right column, if condition, append the corresponding row to the new table
+        # Simplify the full outer join as left outer and right outer
         for row_left in self.data:
             left_value = row_left[column_index_left]
             exist = False
@@ -574,7 +567,7 @@ class Table:
         # if we dont skip these rows, the returning table has empty rows at the deleted positions
         non_none_rows = [row for row in self.data if any(row)]
         #non_none_rows = ['noll' for x in non_none_rows if any(x)==-52]
-        for i,j in enumerate(non_none_rows):
+        for i,j in enumerate(non_none_rows):        #Search or None elements at non_none rows and replace those with 'null'
             for n in range(len(self.columns)):
                 if j[n] == None:
                     non_none_rows[i][n] = 'null'

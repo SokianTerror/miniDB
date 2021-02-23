@@ -364,9 +364,11 @@ class Database:
         if self.is_locked(left_table_name) or self.is_locked(right_table_name):
             print(f'Table/Tables are currently locked')
             return
-        #left_column_name, operator, right_column_name = self._parse_condition(condition, join=True)
-        #self.tables[left_table_name]._sort(left_column_name, True)
-        #self.tables[right_table_name]._(right_column_name, True)
+        '''
+        Wrapper function for sort_merge
+        both tables must exist
+        and parameters should be well given from user
+        '''
         res = self.tables[left_table_name]._sort_merge_join(self.tables[right_table_name], condition)
         if save_as is not None:
             res._name = save_as
@@ -407,16 +409,9 @@ class Database:
 
     def right_outer_join(self, left_table_name, right_table_name, condition, save_as=None, return_object=False):
         '''
-        Join two tables that are part of the database where condition is met.
-        left_table_name -> left table's name (needs to exist in database)
-        right_table_name -> right table's name (needs to exist in database)
-        condition -> a condition using the following format :
-                    'column[<,<=,==,>=,>]value' or
-                    'value[<,<=,==,>=,>]column'.
-
-                    operatores supported -> (<,<=,==,>=,>)
-        save_as -> The name that will be used to save the resulting table in the database. Def: None (no save)
-        return_object -> If true, the result will be a table object (usefull for internal usage). Def: False (the result will be printed)
+        wrapper function for right outer join of two tables
+        both tables must exist
+        and parameters should be well given from user
         '''
         self.load(self.savedir)
         if self.is_locked(left_table_name) or self.is_locked(right_table_name):
@@ -434,6 +429,13 @@ class Database:
                 res.show()
 
     def left_outer_join(self, left_table_name, right_table_name, condition, save_as=None, return_object=False):
+
+        '''
+       wrapper function for left outer join of two tables
+       both tables must exist
+       and parameters should be well given from user
+       '''
+
         self.load(self.savedir)
         if self.is_locked(left_table_name) or self.is_locked(right_table_name):
             print(f'Table/Tables are currently locked')
@@ -450,6 +452,11 @@ class Database:
                 res.show()
 
     def full_outer_join(self, left_table_name, right_table_name, condition, save_as=None, return_object=False):
+        '''
+           wrapper function for full outer join of two tables
+           both tables must exist
+           and parameters should be well given from user
+        '''
         self.load(self.savedir)
         if self.is_locked(left_table_name) or self.is_locked(right_table_name):
             print(f'Table/Tables are currently locked')
