@@ -320,14 +320,17 @@ class Table:
             right_value = table_right.data[j][column_index_right]
             if left_value==right_value: #In case of same value, add row of where value was found to my new table
                 join_table._insert(self.data[i]+ table_right.data[j])
-                if i == len(self.columns)-1 and j == len(table_right.columns) -1: #In case we are at bot of both lists break
+                if j != len(table_right.columns) - 1: #if we are at bot of right_table
+                    j += 1
+                else:
                     break
-                j+=1
-            elif left_value > right_value:
-                if i == len(self.columns)-1 and j == len(table_right.columns) -1:
 
+            elif left_value > right_value:
+                if j != len(table_right.columns) -1:
+                    j+=1
+                else:
                     break
-                j+=1
+
             elif left_value < right_value:
                 i+=1
                 if i<=len(self.data)-1: #In case i (= left index) is at the end of left list and right_value is greater than left_value break
