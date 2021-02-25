@@ -566,7 +566,6 @@ class Table:
         # detect the rows that are no tfull of nones (these rows have been deleted)
         # if we dont skip these rows, the returning table has empty rows at the deleted positions
         non_none_rows = [row for row in self.data if any(row)]
-        #non_none_rows = ['noll' for x in non_none_rows if any(x)==-52]
         for i,j in enumerate(non_none_rows):        #Search or None elements at non_none rows and replace those with 'null'
             for n in range(len(self.columns)):
                 if j[n] == None:
